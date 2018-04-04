@@ -1,0 +1,14 @@
+[PreviousGenFiles]
+HeaderPath=/home/zack/src/filter-benchmarks/Inc
+HeaderFiles=stm32l4xx_it.h;stm32l4xx_hal_conf.h;main.h;stm32_assert.h;
+SourcePath=/home/zack/src/filter-benchmarks/Src
+SourceFiles=stm32l4xx_it.c;stm32l4xx_hal_msp.c;main.c;
+
+[PreviousLibFiles]
+LibFiles=Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_gpio.h;Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_exti.h;Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_system.h;Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_pwr.h;Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_usart.h;Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_rcc.h;Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_dma.h;Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_dmamux.h;Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_bus.h;Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_cortex.h;Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_crs.h;Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_utils.h;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_utils.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_exti.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_gpio.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_exti.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_pwr.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_usart.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_rcc.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_dma.c;Drivers/CMSIS/Device/ST/STM32L4xx/Include/stm32l432xx.h;Drivers/CMSIS/Device/ST/STM32L4xx/Include/stm32l4xx.h;Drivers/CMSIS/Device/ST/STM32L4xx/Include/system_stm32l4xx.h;Drivers/CMSIS/Device/ST/STM32L4xx/Source/Templates/system_stm32l4xx.c;Drivers/CMSIS/Include/core_cm7.h;Drivers/CMSIS/Include/core_cmInstr.h;Drivers/CMSIS/Include/cmsis_armcc_V6.h;Drivers/CMSIS/Include/cmsis_gcc.h;Drivers/CMSIS/Include/core_cm0.h;Drivers/CMSIS/Include/core_cm3.h;Drivers/CMSIS/Include/core_cmFunc.h;Drivers/CMSIS/Include/core_cm4.h;Drivers/CMSIS/Include/arm_math.h;Drivers/CMSIS/Include/arm_const_structs.h;Drivers/CMSIS/Include/cmsis_armcc.h;Drivers/CMSIS/Include/core_sc300.h;Drivers/CMSIS/Include/core_cm0plus.h;Drivers/CMSIS/Include/core_sc000.h;Drivers/CMSIS/Include/arm_common_tables.h;Drivers/CMSIS/Include/core_cmSimd.h;
+
+[PreviousUsedMakefileFiles]
+SourceFiles=Src/main.c;Src/stm32l4xx_it.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_utils.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_exti.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_gpio.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_exti.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_pwr.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_usart.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_rcc.c;Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_dma.c;/Src/system_stm32l4xx.c;Drivers/CMSIS/Device/ST/STM32L4xx/Source/Templates/system_stm32l4xx.c;/home/zack/src/filter-benchmarks///startup_stm32l432xx.s;
+HeaderPath=Drivers/STM32L4xx_HAL_Driver/Inc;Drivers/CMSIS/Device/ST/STM32L4xx/Include;Drivers/CMSIS/Include;Inc;
+CDefines=USE_FULL_LL_DRIVER;
+
