@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+set -u
+
+source .openocd_env
+echo "Using openocd at $OPENOCD"
+echo "Using openocd scripts at $OPENOCD_SCRIPTS"
+
+ELF=$1
+echo "Using ELF file at $ELF"
+
+openocd -s $OPENOCD_SCRIPTS \
+    -f interface/stlink-v2-1.cfg \
+    -f target/stm32l4x.cfg \
+    -c "init" \
+    -c "targets" \
+    -c "reset halt" \
+    -c "program $ELF verify" \
+    -c "reset run" \
+    -c "exit"

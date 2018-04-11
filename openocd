@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e
+set -u
+
+source .openocd_env
+echo "Using openocd at $OPENOCD"
+echo "Using openocd scripts at $OPENOCD_SCRIPTS"
+
+openocd -s $OPENOCD_SCRIPTS \
+    -f interface/stlink-v2-1.cfg \
+    -f target/stm32l4x.cfg \
+    -c "telnet_port 4444" \
+    -c "gdb_port 3333"

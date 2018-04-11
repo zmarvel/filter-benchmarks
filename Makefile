@@ -30,20 +30,22 @@ BUILD_DIR = build
 # C sources
 C_SOURCES = Src/main.c \
 	    Src/stm32l4xx_it.c \
-	    Src/system_stm32l4xx.c \
-	    $(PERIFLIB_PATH)/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_exti.c \
-	    $(PERIFLIB_PATH)/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_gpio.c \
-	    $(PERIFLIB_PATH)/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_pwr.c \
-	    $(PERIFLIB_PATH)/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_rcc.c \
-	    $(PERIFLIB_PATH)/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_usart.c \
-	    $(PERIFLIB_PATH)/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_dma.c \
-	    $(PERIFLIB_PATH)/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_utils.c
+	    Src/system_stm32l4xx.c
 
 # ASM sources
 ASM_SOURCES = startup_stm32l432xx.s
 
 
-PERIFLIB_SOURCES = 
+PERIFLIB_SOURCES = Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_exti.c \
+		   Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_gpio.c \
+		   Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_pwr.c \
+		   Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_rcc.c \
+		   Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_usart.c \
+		   Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_dma.c \
+		   Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_utils.c \
+		   
+
+C_SOURCES += $(foreach s, $(PERIFLIB_SOURCES), $(addprefix $(PERIFLIB_PATH), $(s)))
 
 
 BINPATH = /usr/bin
@@ -112,10 +114,12 @@ LDSCRIPT = STM32L432KCUx_FLASH.ld
 # libraries
 LIBS = -lc -lm -lnosys 
 LIBDIR = 
-LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) \
+	  -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
-all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
+all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex \
+    $(BUILD_DIR)/$(TARGET).bin
 
 
 # list of objects
@@ -149,5 +153,3 @@ clean:
 
 # dependencies
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
-
-# *** EOF ***
