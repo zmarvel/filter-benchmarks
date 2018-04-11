@@ -3,7 +3,22 @@
 set -e
 set -u
 
-source .openocd_env
+if [ -f .openocd_env ]; then
+    source .openocd_env
+else
+    if [ -d /usr/share/openocd ]; then
+        OPENOCD=/usr/bin/openocd
+        OPENOCD_SCRIPTS=/usr/share/scripts/
+    elif [ -d /usr/local/share/openocd ]; then
+        OPENOCD=/usr/local/bin/openocd
+        OPENOCD_SCRIPTS=/usr/local/share/scripts/
+    else
+        echo "openocd could not be found. Please specify its path"
+        echo "in .openocd_env as described in README.md"
+        exit -1
+    fi
+fi
+
 echo "Using openocd at $OPENOCD"
 echo "Using openocd scripts at $OPENOCD_SCRIPTS"
 
