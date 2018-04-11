@@ -35,15 +35,22 @@ C_SOURCES = Src/main.c \
 # ASM sources
 ASM_SOURCES = startup_stm32l432xx.s
 
+HAL_SRC_DIR=Drivers/STM32L4xx_HAL_Driver/Src/
+DSP_SRC_DIR=Drivers/CMSIS/DSP_Lib/Source/
+PERIFLIB_SOURCES = $(HAL_SRC_DIR)/stm32l4xx_ll_exti.c \
+		   $(HAL_SRC_DIR)/stm32l4xx_ll_gpio.c \
+		   $(HAL_SRC_DIR)/stm32l4xx_ll_pwr.c \
+		   $(HAL_SRC_DIR)/stm32l4xx_ll_rcc.c \
+		   $(HAL_SRC_DIR)/stm32l4xx_ll_usart.c \
+		   $(HAL_SRC_DIR)/stm32l4xx_ll_dma.c \
+		   $(HAL_SRC_DIR)/stm32l4xx_ll_utils.c \
+		   $(DSP_SRC_DIR)/FilteringFunctions/arm_biquad_cascade_df1_f32.c \
+		   $(DSP_SRC_DIR)/FilteringFunctions/arm_biquad_cascade_df1_init_f32.c \
+		   $(DSP_SRC_DIR)/FilteringFunctions/arm_fir_f32.c \
+		   $(DSP_SRC_DIR)/FilteringFunctions/arm_fir_init_f32.c \
+		   $(DSP_SRC_DIR)/FilteringFunctions/arm_iir_lattice_f32.c \
+		   $(DSP_SRC_DIR)/FilteringFunctions/arm_iir_lattice_init_f32.c
 
-PERIFLIB_SOURCES = Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_exti.c \
-		   Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_gpio.c \
-		   Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_pwr.c \
-		   Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_rcc.c \
-		   Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_usart.c \
-		   Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_dma.c \
-		   Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_utils.c \
-		   
 
 C_SOURCES += $(foreach s, $(PERIFLIB_SOURCES), $(addprefix $(PERIFLIB_PATH), $(s)))
 
@@ -79,7 +86,9 @@ AS_DEFS =
 
 # C defines
 C_DEFS = -DSTM32L432xx \
-	 -DUSE_FULL_LL_DRIVER
+	 -DUSE_FULL_LL_DRIVER \
+	 -DARM_MATH_CM4 \
+	 -D__FPU_PRESENT=1
 
 
 # AS includes
