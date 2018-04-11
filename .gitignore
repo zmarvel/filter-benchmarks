@@ -36,3 +36,6 @@
 *.su
 
 build/
+
+# openocd script config
+.openocd_env
