@@ -39,3 +39,6 @@ build/
 
 # openocd script config
 .openocd_env
+
+.ipynb_checkpoints
+env
