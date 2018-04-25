@@ -30,13 +30,16 @@ BUILD_DIR = build
 # C sources
 C_SOURCES = Src/main.c \
 	    Src/stm32l4xx_it.c \
-	    Src/system_stm32l4xx.c
+	    Src/system_stm32l4xx.c \
+	    Src/ys.c \
+	    Src/fir.c \
+	    Src/iir.c
 
 # ASM sources
 ASM_SOURCES = startup_stm32l432xx.s
 
-HAL_SRC_DIR=Drivers/STM32L4xx_HAL_Driver/Src/
-DSP_SRC_DIR=Drivers/CMSIS/DSP_Lib/Source/
+HAL_SRC_DIR=Drivers/STM32L4xx_HAL_Driver/Src
+DSP_SRC_DIR=Drivers/CMSIS/DSP_Lib/Source
 PERIFLIB_SOURCES = $(HAL_SRC_DIR)/stm32l4xx_ll_exti.c \
 		   $(HAL_SRC_DIR)/stm32l4xx_ll_gpio.c \
 		   $(HAL_SRC_DIR)/stm32l4xx_ll_pwr.c \
@@ -44,12 +47,18 @@ PERIFLIB_SOURCES = $(HAL_SRC_DIR)/stm32l4xx_ll_exti.c \
 		   $(HAL_SRC_DIR)/stm32l4xx_ll_usart.c \
 		   $(HAL_SRC_DIR)/stm32l4xx_ll_dma.c \
 		   $(HAL_SRC_DIR)/stm32l4xx_ll_utils.c \
-		   $(DSP_SRC_DIR)/FilteringFunctions/arm_biquad_cascade_df1_f32.c \
 		   $(DSP_SRC_DIR)/FilteringFunctions/arm_biquad_cascade_df1_init_f32.c \
+		   $(DSP_SRC_DIR)/FilteringFunctions/arm_biquad_cascade_df1_f32.c \
+		   $(DSP_SRC_DIR)/FilteringFunctions/arm_biquad_cascade_df2T_init_f32.c \
+		   $(DSP_SRC_DIR)/FilteringFunctions/arm_biquad_cascade_df2T_f32.c \
+		   $(DSP_SRC_DIR)/FilteringFunctions/arm_biquad_cascade_df1_32x64_init_q31.c \
+		   $(DSP_SRC_DIR)/FilteringFunctions/arm_biquad_cascade_df1_32x64_q31.c \
 		   $(DSP_SRC_DIR)/FilteringFunctions/arm_fir_f32.c \
 		   $(DSP_SRC_DIR)/FilteringFunctions/arm_fir_init_f32.c \
-		   $(DSP_SRC_DIR)/FilteringFunctions/arm_iir_lattice_f32.c \
-		   $(DSP_SRC_DIR)/FilteringFunctions/arm_iir_lattice_init_f32.c
+		   $(DSP_SRC_DIR)/FilteringFunctions/arm_fir_init_q31.c \
+		   $(DSP_SRC_DIR)/FilteringFunctions/arm_fir_q31.c \
+		   $(DSP_SRC_DIR)/SupportFunctions/arm_float_to_q31.c \
+		   $(DSP_SRC_DIR)/SupportFunctions/arm_q31_to_float.c
 
 
 C_SOURCES += $(foreach s, $(PERIFLIB_SOURCES), $(addprefix $(PERIFLIB_PATH), $(s)))
@@ -130,6 +139,10 @@ LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) \
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex \
     $(BUILD_DIR)/$(TARGET).bin
 
+Src/ys.c: generate_noise.py
+	filter-env/bin/python3 $< -c -I Inc $@
+
+Inc/ys.h: Src/ys.c
 
 # list of objects
 OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
@@ -138,7 +151,7 @@ OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
 	OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 	vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
-$(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
+$(BUILD_DIR)/%.o: %.c Makefile Inc/ys.h | $(BUILD_DIR) 
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
@@ -158,7 +171,7 @@ $(BUILD_DIR):
 	mkdir $@		
 
 clean:
-	-rm -fR .dep $(BUILD_DIR)
+	-rm -fR .dep $(BUILD_DIR) Src/ys.c Inc/ys.h
 
 # dependencies
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)

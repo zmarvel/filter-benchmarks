@@ -25,6 +25,8 @@ echo "Using openocd scripts at $OPENOCD_SCRIPTS"
 ELF=$1
 echo "Using ELF file at $ELF"
 
+# -c "reset_config srst_only connect_assert_srst"
+
 openocd -s $OPENOCD_SCRIPTS \
     -f interface/stlink-v2-1.cfg \
     -f target/stm32l4x.cfg \

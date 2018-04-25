@@ -38,66 +38,119 @@
  */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "arm_math.h"
+#include "ys.h"
 
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* Private variables ---------------------------------------------------------*/
-
-/* USER CODE BEGIN PV */
-/* Private variables ---------------------------------------------------------*/
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
 static void LL_Init(void);
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 
-/* USER CODE BEGIN PFP */
-/* Private function prototypes -----------------------------------------------*/
 
-/* USER CODE END PFP */
+//#define FIR_TAPS 74
+#define FIR_TAPS 104
+#define FIR_STATE_SIZE FIR_TAPS+FILTER_BLOCK_SIZE-1
 
-/* USER CODE BEGIN 0 */
+#define IIR_STAGES 5
+#define IIR_COEFFS 5*IIR_STAGES
+#define IIR_STATE_SIZE 4*IIR_STAGES
+#define BIQUAD_POST_SHIFT 1
 
-/* USER CODE END 0 */
 
-/**
- * @brief  The application entry point.
- *
- * @retval None
- */
+arm_fir_instance_f32 fir;
+arm_fir_instance_q31 firFixed;
+arm_biquad_cascade_df2T_instance_f32 iirFloat;
+//arm_biquad_casd_df1_inst_f32 iirFloat;
+arm_biquad_cas_df1_32x64_ins_q31 iirFixed;
+/* pState is of length numTaps+blockSize-1 samples */
+float firState[FIR_STATE_SIZE];
+float iirState[IIR_STATE_SIZE];
+q63_t iirStateFixed[IIR_STATE_SIZE];
+
+q31_t filterInputFixed[FILTER_BLOCK_SIZE];
+
+float filterOutput[FILTER_BLOCK_SIZE];
+
+extern float *const firCoeffs;
+q31_t firCoeffsFixed[FIR_TAPS-1];
+
+extern float iirCoeffsBy2[IIR_COEFFS];
+extern float iirCoeffs[IIR_COEFFS];
+extern q31_t iirCoeffsFixed[];
+
+
 int main(void)
 {
-    /* USER CODE BEGIN 1 */
-
-    /* USER CODE END 1 */
-
     /* MCU Configuration----------------------------------------------------------*/
 
     /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
     LL_Init();
 
-    /* USER CODE BEGIN Init */
-
-    /* USER CODE END Init */
-
     /* Configure the system clock */
     SystemClock_Config();
-
-    /* USER CODE BEGIN SysInit */
-
-    /* USER CODE END SysInit */
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
     MX_USART2_UART_Init();
 
+
+    LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    
+    /* f32 FIR */
+    arm_fir_init_f32(&fir, FIR_TAPS, firCoeffs, firState, FILTER_BLOCK_SIZE);
+
+    LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    arm_fir_f32(&fir, (float *)filterInput, filterOutput, FILTER_BLOCK_SIZE);
+    LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
+
+    /* q31 FIR */
+    arm_float_to_q31(firCoeffs, firCoeffsFixed, FIR_TAPS-1);
+    arm_float_to_q31((float *)filterInput, filterInputFixed, FILTER_BLOCK_SIZE);
+
+    arm_fir_init_q31(&firFixed, FIR_TAPS, firCoeffsFixed, (q31_t *)firState,
+                     FILTER_BLOCK_SIZE);
+
+    LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    arm_fir_q31(&firFixed, filterInputFixed, (q31_t *)filterOutput,
+                FILTER_BLOCK_SIZE);
+    LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
+
+    arm_q31_to_float((q31_t *)filterOutput, filterOutput, FILTER_BLOCK_SIZE);
+
+
+
+    /* f32 IIR */
+    arm_biquad_cascade_df2T_init_f32(&iirFloat, IIR_STAGES, iirCoeffs,
+                                     iirState);
+    //arm_biquad_cascade_df1_init_f32(&iirFloat, IIR_STAGES, iirCoeffs,
+    //                                iirState);
+    LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    arm_biquad_cascade_df2T_f32(&iirFloat, filterInput, filterOutput,
+                                 FILTER_BLOCK_SIZE);
+    //arm_biquad_cascade_df1_f32(&iirFloat, filterInput, filterOutput,
+    //                             FILTER_BLOCK_SIZE);
+    LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
+
+
+
+
+    arm_float_to_q31(iirCoeffsBy2, iirCoeffsFixed, IIR_COEFFS);
+
+    /* q31 IIR */
+    arm_biquad_cas_df1_32x64_init_q31(&iirFixed, IIR_STAGES, iirCoeffsFixed,
+                                      iirStateFixed, BIQUAD_POST_SHIFT);
+
+
+    LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    arm_biquad_cas_df1_32x64_q31(&iirFixed, filterInputFixed,
+                                 (q31_t *)filterOutput, FILTER_BLOCK_SIZE);
+    LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
+
+    arm_q31_to_float((q31_t *)filterOutput, filterOutput, FILTER_BLOCK_SIZE);
+
+
+
     /* Infinite loop */
-    /* USER CODE BEGIN WHILE */
     while (1) {
 
         LL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
