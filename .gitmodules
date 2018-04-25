@@ -1,0 +1,3 @@
+[submodule "pyopenocd"]
+	path = pyopenocd
+	url = git@github.com:zmarvel/python-openocd.git
