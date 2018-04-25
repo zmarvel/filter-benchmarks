@@ -78,6 +78,8 @@ extern float iirCoeffsBy2[IIR_COEFFS];
 extern float iirCoeffs[IIR_COEFFS];
 extern q31_t iirCoeffsFixed[];
 
+volatile uint32_t cycles;
+
 
 int main(void)
 {
@@ -91,8 +93,14 @@ int main(void)
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
-    MX_USART2_UART_Init();
+    //MX_USART2_UART_Init();
 
+
+
+    // Enable DWT
+    CoreDebug->DEMCR |= 0x01000000;
+    DWT->CYCCNT = 0;
+    DWT->CTRL |= 1;
 
     LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
     
@@ -100,7 +108,9 @@ int main(void)
     arm_fir_init_f32(&fir, FIR_TAPS, firCoeffs, firState, FILTER_BLOCK_SIZE);
 
     LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    DWT->CYCCNT = 0;
     arm_fir_f32(&fir, (float *)filterInput, filterOutput, FILTER_BLOCK_SIZE);
+    cycles = DWT->CYCCNT;
     LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
 
     /* q31 FIR */
@@ -111,8 +121,10 @@ int main(void)
                      FILTER_BLOCK_SIZE);
 
     LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    DWT->CYCCNT = 0;
     arm_fir_q31(&firFixed, filterInputFixed, (q31_t *)filterOutput,
                 FILTER_BLOCK_SIZE);
+    cycles = DWT->CYCCNT;
     LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
 
     arm_q31_to_float((q31_t *)filterOutput, filterOutput, FILTER_BLOCK_SIZE);
@@ -125,8 +137,10 @@ int main(void)
     //arm_biquad_cascade_df1_init_f32(&iirFloat, IIR_STAGES, iirCoeffs,
     //                                iirState);
     LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    DWT->CYCCNT = 0;
     arm_biquad_cascade_df2T_f32(&iirFloat, filterInput, filterOutput,
                                  FILTER_BLOCK_SIZE);
+    cycles = DWT->CYCCNT;
     //arm_biquad_cascade_df1_f32(&iirFloat, filterInput, filterOutput,
     //                             FILTER_BLOCK_SIZE);
     LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
@@ -142,13 +156,16 @@ int main(void)
 
 
     LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    DWT->CYCCNT = 0;
     arm_biquad_cas_df1_32x64_q31(&iirFixed, filterInputFixed,
                                  (q31_t *)filterOutput, FILTER_BLOCK_SIZE);
+    cycles = DWT->CYCCNT;
     LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
 
     arm_q31_to_float((q31_t *)filterOutput, filterOutput, FILTER_BLOCK_SIZE);
 
 
+    DWT->CTRL &= ~1;
 
     /* Infinite loop */
     while (1) {
