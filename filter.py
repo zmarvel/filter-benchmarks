@@ -19,6 +19,8 @@ output_addr, _ = st.lookup("filterOutput")
 delay_addr, _ = st.lookup("LL_mDelay")
 to_float_addr, _ = st.lookup("arm_q31_to_float")
 
+cycles_addr, _ = st.lookup("cycles")
+
 print('FIR f32:', hex(fir_f32_addr))
 #print('FIR q31:', hex(fir_q31_addr))
 print('output:', hex(output_addr))
@@ -34,11 +36,17 @@ with ocd.OpenOCD(verbose=True) as o:
     o.wait_halt()
     o.delete_breakpoint(addr)
 
+    DWT = 0xE0001000
+    DWT_CNT = DWT+4
     addr, _ = st.lookup(filter_funs[1])
     o.set_breakpoint(addr)
     # Run the filter and stop before the next one
     o.resume()
     o.wait_halt()
+    cnt = o.read_variable(cycles_addr)
+    print('****************')
+    print('COUNT:', cnt)
+    print('****************')
     o.delete_breakpoint(addr)
     o.dump_image(filter_funs[0]+'.bin', output_addr, 4004*4)
 
@@ -47,6 +55,10 @@ with ocd.OpenOCD(verbose=True) as o:
     # Run the filter and stop before the next one
     o.resume()
     o.wait_halt()
+    cnt = o.read_variable(cycles_addr)
+    print('****************')
+    print('COUNT:', cnt)
+    print('****************')
     o.delete_breakpoint(addr)
     o.dump_image(filter_funs[1]+'.bin', output_addr, 4004*4)
 
@@ -55,6 +67,10 @@ with ocd.OpenOCD(verbose=True) as o:
     # Run the filter and stop before the next one
     o.resume()
     o.wait_halt()
+    cnt = o.read_variable(cycles_addr)
+    print('****************')
+    print('COUNT:', cnt)
+    print('****************')
     o.delete_breakpoint(addr)
     o.dump_image(filter_funs[2]+'.bin', output_addr, 4004*4)
 
@@ -63,6 +79,10 @@ with ocd.OpenOCD(verbose=True) as o:
     # Run the filter and stop before the next one
     o.resume()
     o.wait_halt()
+    cnt = o.read_variable(cycles_addr)
+    print('****************')
+    print('COUNT:', cnt)
+    print('****************')
     o.delete_breakpoint(addr)
     o.dump_image(filter_funs[3]+'.bin', output_addr, 4004*4)
 
