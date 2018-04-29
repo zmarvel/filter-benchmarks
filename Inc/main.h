@@ -73,6 +73,17 @@
 #define VCP_RX_GPIO_Port GPIOA
 #define LD3_Pin LL_GPIO_PIN_3
 #define LD3_GPIO_Port GPIOB
+//#define D7_GPIO_Port GPIOC
+//#define D7_GPIO_Pin LL_GPIO_PIN_14
+#define D3_GPIO_Port GPIOB
+#define D3_GPIO_Pin LL_GPIO_PIN_0
+#define D7_GPIO_Port D3_GPIO_Port
+#define D7_GPIO_Pin D3_GPIO_Pin
+#define D9_GPIO_Port GPIOA
+#define D9_GPIO_Pin LL_GPIO_PIN_8
+#define USER_BTN_GPIO_Port D9_GPIO_Port
+#define USER_BTN_GPIO_Pin D9_GPIO_Pin
+
 #ifndef NVIC_PRIORITYGROUP_0
 #define NVIC_PRIORITYGROUP_0         ((uint32_t)0x00000007) /*!< 0 bit  for pre-emption priority,
                                                                  4 bits for subpriority */

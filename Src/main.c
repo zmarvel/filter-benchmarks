@@ -45,6 +45,7 @@ static void LL_Init(void);
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
+static inline void blip(uint32_t ms);
 
 
 //#define FIR_TAPS 74
@@ -102,16 +103,19 @@ int main(void)
     DWT->CYCCNT = 0;
     DWT->CTRL |= 1;
 
-    LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    LL_GPIO_ResetOutputPin(D7_GPIO_Port, D7_GPIO_Pin);
     
     /* f32 FIR */
     arm_fir_init_f32(&fir, FIR_TAPS, firCoeffs, firState, FILTER_BLOCK_SIZE);
 
-    LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    while (LL_GPIO_IsInputPinSet(USER_BTN_GPIO_Port, USER_BTN_GPIO_Pin));
+    LL_GPIO_SetOutputPin(D7_GPIO_Port, D7_GPIO_Pin);
+    LL_mDelay(10);
     DWT->CYCCNT = 0;
     arm_fir_f32(&fir, (float *)filterInput, filterOutput, FILTER_BLOCK_SIZE);
     cycles = DWT->CYCCNT;
-    LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    LL_GPIO_ResetOutputPin(D7_GPIO_Port, D7_GPIO_Pin);
+    LL_mDelay(500);
 
     /* q31 FIR */
     arm_float_to_q31(firCoeffs, firCoeffsFixed, FIR_TAPS-1);
@@ -120,12 +124,15 @@ int main(void)
     arm_fir_init_q31(&firFixed, FIR_TAPS, firCoeffsFixed, (q31_t *)firState,
                      FILTER_BLOCK_SIZE);
 
-    LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    while (LL_GPIO_IsInputPinSet(USER_BTN_GPIO_Port, USER_BTN_GPIO_Pin));
+    LL_GPIO_SetOutputPin(D7_GPIO_Port, D7_GPIO_Pin);
+    LL_mDelay(10);
     DWT->CYCCNT = 0;
     arm_fir_q31(&firFixed, filterInputFixed, (q31_t *)filterOutput,
                 FILTER_BLOCK_SIZE);
     cycles = DWT->CYCCNT;
-    LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    LL_GPIO_ResetOutputPin(D7_GPIO_Port, D7_GPIO_Pin);
+    LL_mDelay(500);
 
     arm_q31_to_float((q31_t *)filterOutput, filterOutput, FILTER_BLOCK_SIZE);
 
@@ -136,14 +143,17 @@ int main(void)
                                      iirState);
     //arm_biquad_cascade_df1_init_f32(&iirFloat, IIR_STAGES, iirCoeffs,
     //                                iirState);
-    LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    while (LL_GPIO_IsInputPinSet(USER_BTN_GPIO_Port, USER_BTN_GPIO_Pin));
+    LL_GPIO_SetOutputPin(D7_GPIO_Port, D7_GPIO_Pin);
+    LL_mDelay(10);
     DWT->CYCCNT = 0;
     arm_biquad_cascade_df2T_f32(&iirFloat, filterInput, filterOutput,
                                  FILTER_BLOCK_SIZE);
     cycles = DWT->CYCCNT;
     //arm_biquad_cascade_df1_f32(&iirFloat, filterInput, filterOutput,
     //                             FILTER_BLOCK_SIZE);
-    LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    LL_GPIO_ResetOutputPin(D7_GPIO_Port, D7_GPIO_Pin);
+    LL_mDelay(500);
 
 
 
@@ -155,12 +165,15 @@ int main(void)
                                       iirStateFixed, BIQUAD_POST_SHIFT);
 
 
-    LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    while (LL_GPIO_IsInputPinSet(USER_BTN_GPIO_Port, USER_BTN_GPIO_Pin));
+    LL_GPIO_SetOutputPin(D7_GPIO_Port, D7_GPIO_Pin);
+    LL_mDelay(10);
     DWT->CYCCNT = 0;
     arm_biquad_cas_df1_32x64_q31(&iirFixed, filterInputFixed,
                                  (q31_t *)filterOutput, FILTER_BLOCK_SIZE);
     cycles = DWT->CYCCNT;
-    LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    LL_GPIO_ResetOutputPin(D7_GPIO_Port, D7_GPIO_Pin);
+    LL_mDelay(500);
 
     arm_q31_to_float((q31_t *)filterOutput, filterOutput, FILTER_BLOCK_SIZE);
 
@@ -170,8 +183,17 @@ int main(void)
     /* Infinite loop */
     while (1) {
 
-        LL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
-        LL_mDelay(400);
+        //LL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+        LL_mDelay(10);
+
+        if (!LL_GPIO_IsInputPinSet(USER_BTN_GPIO_Port, USER_BTN_GPIO_Pin)) {
+            LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+            LL_GPIO_SetOutputPin(D7_GPIO_Port, D7_GPIO_Pin);
+        }
+        else {
+            LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
+            LL_GPIO_ResetOutputPin(D7_GPIO_Port, D7_GPIO_Pin);
+        }
 
     }
     /* USER CODE END 3 */
@@ -345,10 +367,9 @@ static void MX_GPIO_Init(void)
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
 
-    /**/
+    /* LED */
     LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
 
-    /**/
     GPIO_InitStruct.Pin = LD3_Pin;
     GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
     GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
@@ -356,6 +377,31 @@ static void MX_GPIO_Init(void)
     GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
     LL_GPIO_Init(LD3_GPIO_Port, &GPIO_InitStruct);
 
+    /* Power measurement trigger */
+    LL_GPIO_ResetOutputPin(D7_GPIO_Port, D7_GPIO_Pin);
+
+    GPIO_InitStruct.Pin = D7_GPIO_Pin;
+    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+    LL_GPIO_Init(D7_GPIO_Port, &GPIO_InitStruct);
+
+    /* User button */
+    GPIO_InitStruct.Pin = USER_BTN_GPIO_Pin;
+    GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
+    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+    GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
+    LL_GPIO_Init(USER_BTN_GPIO_Port, &GPIO_InitStruct);
+
+}
+
+
+static inline void blip(uint32_t ms) {
+    LL_GPIO_SetOutputPin(LD3_GPIO_Port, LD3_Pin);
+    LL_mDelay(ms);
+    LL_GPIO_ResetOutputPin(LD3_GPIO_Port, LD3_Pin);
 }
 
 /* USER CODE BEGIN 4 */
