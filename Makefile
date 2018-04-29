@@ -173,5 +173,11 @@ $(BUILD_DIR):
 clean:
 	-rm -fR .dep $(BUILD_DIR) Src/ys.c Inc/ys.h
 
+
+download: $(BUILD_DIR)/$(TARGET).elf
+	./download $<
+
+
+
 # dependencies
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
