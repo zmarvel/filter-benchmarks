@@ -1,0 +1,12 @@
+* CMSIS DSP Lib
+** Conv = convolution
+** Decimate ~= downsample
+
+* Resources
+- https://sound.stackexchange.com/questions/24637/what-does-poles-mean-in-relation-to-a-filter
+- https://www.theunterminatedstring.com/cmsis-arm-fir-comparison/
+* Testing strategy
+- Generate 16 kB? of test noise
+* Nucleo-32
+  - Remove SB9 or the onboard ST-Link will hold RST low (allows power via 3v3 pin)
+  - The power board's trigger pin is D7. I either had to remove SB5 and SB7 and place SB6, or connect another pin to D7 with a wire (I used D3/PB0 for convenience). D7/PC14 and D8/PC15 by default are connected to LSE (external oscillator X1).
