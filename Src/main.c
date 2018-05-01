@@ -48,8 +48,8 @@ static void MX_USART2_UART_Init(void);
 static inline void blip(uint32_t ms);
 
 
-//#define FIR_TAPS 74
-#define FIR_TAPS 104
+//#define FIR_TAPS 73
+#define FIR_TAPS 103
 #define FIR_STATE_SIZE FIR_TAPS+FILTER_BLOCK_SIZE-1
 
 #define IIR_STAGES 5
@@ -118,7 +118,7 @@ int main(void)
     LL_mDelay(500);
 
     /* q31 FIR */
-    arm_float_to_q31(firCoeffs, firCoeffsFixed, FIR_TAPS-1);
+    arm_float_to_q31(firCoeffs, firCoeffsFixed, FIR_TAPS);
     arm_float_to_q31((float *)filterInput, filterInputFixed, FILTER_BLOCK_SIZE);
 
     arm_fir_init_q31(&firFixed, FIR_TAPS, firCoeffsFixed, (q31_t *)firState,
